@@ -1,0 +1,5 @@
+#- !delete
+#  record: !host oxxo-open
+
+- !delete
+  record: !host oxxo_terrafoms
