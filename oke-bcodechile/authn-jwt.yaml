@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+  generation: 5
+  labels:
+    app: app-example-authnjwt
+  name: app-example-authnjwt
+  namespace: test-app-namespace
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 0
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: app-example-authnjwt
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+      creationTimestamp: null
+      labels:
+        app: app-example-authnjwt
+    spec:
+      automountServiceAccountToken: true
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: conjur-connect
+        - configMapRef:
+            name: app-config-map
+        image: jodyhuntatx/k8s-app:cybrlab
+        imagePullPolicy: IfNotPresent
+        name: test-app
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/run/secrets/sa-token
+          name: sa-token
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: test-app-namespace
+      serviceAccountName: test-app-namespace
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: sa-token
+        secret:
+          defaultMode: 420
+          secretName: test-app-namespace
